@@ -1,78 +1,67 @@
-from fastapi import FastAPI, UploadFile, File
-import onnxruntime as ort
-from PIL import Image
-import numpy as np
-import json
+from fastapi import FastAPI
+from fastapi import UploadFile
+from fastapi import File
+
+import os
+import shutil
+
+from services.breed_service import (
+    predict_breed
+)
+
+from services.age_service import (
+    predict_age
+)
 
 app = FastAPI(
-    title="Dog Breed Recognition API"
+    title="Pet AI Backend"
 )
-
-session = ort.InferenceSession(
-    "model/breed_model.onnx"
-)
-
-with open(
-    "model/classes.json",
-    "r"
-) as f:
-    classes = json.load(f)
-
-
-def preprocess(image):
-
-    image = image.resize((224,224))
-
-    image = np.array(image).astype(np.float32)
-
-    image /= 255.0
-
-    image = np.transpose(
-        image,
-        (2,0,1)
-    )
-
-    image = np.expand_dims(
-        image,
-        axis=0
-    )
-
-    return image
 
 
 @app.get("/")
 def home():
+
     return {
-        "status": "running"
+        "message":
+        "Pet AI Backend Running"
     }
 
 
-@app.post("/predict")
-async def predict(
+@app.post("/analyze-pet")
+async def analyze_pet(
     file: UploadFile = File(...)
 ):
 
-    image = Image.open(
-        file.file
-    ).convert("RGB")
-
-    image = preprocess(image)
-
-    input_name = (
-        session.get_inputs()[0].name
+    os.makedirs(
+        "uploads",
+        exist_ok=True
     )
 
-    output = session.run(
-        None,
-        {
-            input_name: image
-        }
+    file_path = (
+        f"uploads/{file.filename}"
     )
 
-    pred = int(
-        np.argmax(output[0])
+    with open(
+        file_path,
+        "wb"
+    ) as buffer:
+
+        shutil.copyfileobj(
+            file.file,
+            buffer
+        )
+
+    breed_result = predict_breed(
+        file_path
+    )
+
+    age_result = predict_age(
+        file_path
     )
 
     return {
-        "breed": classes[pred]
+        "breed":
+            breed_result,
+        "age":
+            age_result
     }
