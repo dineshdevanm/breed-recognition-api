@@ -49,6 +49,10 @@ def preprocess(image_path):
     return img
 
 
+def softmax(x):
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum()
+
 def predict_breed(image_path):
 
     image = preprocess(
@@ -64,15 +68,14 @@ def predict_breed(image_path):
         {input_name: image}
     )
 
-    probs = outputs[0][0]
+    logits = outputs[0][0]
 
-    idx = int(
-        np.argmax(probs)
-    )
+    probs = softmax(logits)
 
-    confidence = float(
-        probs[idx]
-    )
+    idx = np.argmax(probs)
+
+    confidence = float(probs[idx])
+
 
     return {
         "name":
