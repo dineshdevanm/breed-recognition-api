@@ -48,6 +48,9 @@ def preprocess(image_path):
 
     return img
 
+def softmax(x):
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum()
 
 def predict_age(image_path):
 
@@ -63,16 +66,14 @@ def predict_age(image_path):
         None,
         {input_name: image}
     )
+    logits = outputs[0][0]
 
-    probs = outputs[0][0]
+    probs = softmax(logits)
 
-    idx = int(
-        np.argmax(probs)
-    )
+    idx = np.argmax(probs)
 
-    confidence = float(
-        probs[idx]
-    )
+    confidence = float(probs[idx])
+    
 
     return {
         "group":
