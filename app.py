@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi import UploadFile
 from fastapi import File
+from fastapi.middleware.cors import CORSMiddleware
 
 import os
 import shutil
@@ -16,7 +17,20 @@ from services.age_service import (
 app = FastAPI(
     title="Pet AI Backend"
 )
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "https://zest.pet",
+        "https://www.zest.pet",
+        "https://api.zest.pet",
+        "http://localhost:5173/",
+        "https://zest-a27d3.web.app/"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def home():
