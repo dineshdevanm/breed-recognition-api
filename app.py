@@ -24,8 +24,8 @@ app.add_middleware(
         "https://zest.pet",
         "https://www.zest.pet",
         "https://api.zest.pet",
-        "http://localhost:5173/",
-        "https://zest-a27d3.web.app/"
+        "http://localhost:5173",
+        "https://zest-a27d3.web.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
